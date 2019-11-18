@@ -6,7 +6,7 @@ const ItemConfigs = require('../models/ItemConfigs');
 
 module.exports = {
   async store (req, res) {
-    const {posX, posY, posZ} = req.body;
+    const {pos_x, pos_y, pos_z} = req.body;
     const {relId} = req.params;
     const rel = await UserRepoItem.findByPk(relId);
 
@@ -16,9 +16,9 @@ module.exports = {
 
     const configs = await ItemConfigs.create({
       relId,
-      posX,
-      posY,
-      posZ
+      pos_x,
+      pos_y,
+      pos_z
     })
 
     return res.send(configs);
@@ -32,7 +32,7 @@ module.exports = {
   },
 
   async update (req, res) {
-    const {posX, posY, posZ} = req.body;
+    const {pos_x, pos_y, pos_z} = req.body;
     const {relId} = req.params;
     const rel = await UserRepoItem.findByPk(relId);
 
@@ -40,7 +40,7 @@ module.exports = {
       return res.status(404).send({message: 'Non existent relationship'})
     }
 
-    await rel.update({posX, posY, posZ});
+    await rel.update({pos_x, pos_y, pos_z});
 
     return res.send(rel);
   },

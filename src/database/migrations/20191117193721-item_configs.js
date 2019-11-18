@@ -9,7 +9,7 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true
       },
-      relId: {
+      rel_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
@@ -19,15 +19,15 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      posX: {
+      pos_x: {
         type: Sequelize.REAL,
         allowNull: true
       },
-      posY: {
+      pos_y: {
         type: Sequelize.REAL,
         allowNull: true
       },
-      posZ: {
+      pos_z: {
         type: Sequelize.REAL,
         allowNull: true
       },

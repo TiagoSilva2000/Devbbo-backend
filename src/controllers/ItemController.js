@@ -14,6 +14,7 @@ module.exports = {
   async index(req, res) {
     const items = await Item.findAll();
 
+
     return res.send(items);
   },
 

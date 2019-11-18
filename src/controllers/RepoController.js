@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Repo = require('../models/Repo');
 const Item = require('../models/Item');
 const UserRepoItem = require('../models/UserRepoItem');
+const ItemConfigs = require('../models/ItemConfigs');
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 const htmlToText = require('html-to-text');
@@ -75,11 +76,10 @@ module.exports = {
     const repo = await Repo.create({name})
     const user = await User.findByPk(id);
 
-    console.log(user);
     if (!user) {
       return res.status(404).send({message: "This user was not found!"});
     }
-    // await repo.addUser(user);
+
     const [userRepoItem] = await UserRepoItem.findOrCreate({
       where: {
         user_id:id,
@@ -107,11 +107,30 @@ module.exports = {
 
   async index (req, res) {
     const {id} = req.params;
-    const user = await User.findByPk(id);
+    const {github_username} = await User.findByPk(id);
+    let data = []
 
-    const repos = await Repo.findAll();
+    const repos = await UserRepoItem.findAll({
+      where: {
+        user_id:id
+      },
+      attributes: ['id', 'user_id', 'repo_id', 'item_id'],
+      include: [{ association: 'repo', attributes:['id', 'name']},
+                {association: 'userRepoItem', attributes:['id', 'pos_x', 'pos_y', 'pos_z', 'rel_id']}
+      ],
+    });
+    const frepos = await Promise.all(repos.map(async (repo) => {
+      return getRepoObject(github_username, repo.repo.name);
+    }))
 
-    return res.send(repos);
+    for (let i = 0; i < repos.length; i++) {
+      data.push({
+        info:repos[i],
+        github:frepos[i]
+      })
+    }
+
+    return res.send(data);
   },
 
   async show (req, res) {
@@ -125,9 +144,28 @@ module.exports = {
   },
 
   async update (req, res) {
-    const {name} = req.body;
+    const {name, itemName} = req.body;
     const {repoId} = req.params;
     const repo = await Repo.findByPk(repoId);
+
+    const inRepo = await UserRepoItem.findOne({
+      where: {
+        repo_id:repoId
+      }
+    })
+
+
+    if (itemName) {
+      const item = await Item.findOne({
+        where: {
+          name:itemName
+        }
+      })
+
+      await inRepo.update({
+        item_id:item.id
+      })
+    }
 
     await repo.update({name});
 
